@@ -60,19 +60,9 @@ knowledge of the CeCILL-B license and that you accept its terms.
 #ifndef LIDARDATAVIEW_HPP_
 #define LIDARDATAVIEW_HPP_
 
-#include <vector>
-
-template<typename EchoAdapter>
 class LidarDataView{
-protected:
-	typedef view_element<EchoAdapter> element_type;
-	typedef typename EchoAdapter::value_type value_type;
-	vector<element_type> _elements;
-public:
-	value_type operator[]( size_type x ){
-		return _elements[x].value();
-	}
-}
+
+};
 
 
 #endif /* LIDARDATAVIEW_HPP_ */

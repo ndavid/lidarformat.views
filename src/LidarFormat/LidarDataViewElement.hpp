@@ -60,7 +60,62 @@ knowledge of the CeCILL-B license and that you accept its terms.
 #ifndef LIDARDATAVIEWELEMENT_HPP_
 #define LIDARDATAVIEWELEMENT_HPP_
 
-template<typename _CtnType>
+#include <boost/iterator/iterator_facade.hpp>
+
+template <typename AttType>
+class AttViewIterator
+  : public boost::iterator_facade<
+      AttViewIterator<AttType>
+      , AttType
+      , boost::random_access_traversal_tag
+      , AttType&
+      ,std::ptrdiff_t
+    >
+{
+public:
+    AttViewIterator()
+      : m_raw_data(0),
+       m_stride(0) {}
+
+    explicit AttViewIterator(char* raw_data, unsigned int stride)
+      : m_raw_data(raw_data), m_stride(stride) {}
+
+ private:
+    friend class boost::iterator_core_access;
+
+	//*****************************************************
+	//implement the iterator random access façade interface
+    void increment() { m_raw_data += m_stride; }
+
+    bool equal(AttViewIterator const& other) const
+    {
+        return this->m_raw_data == other.m_raw_data;
+    }
+
+    AttType& dereference() const { 
+    	return *reinterpret_cast<AttType*>(m_raw_data);
+    }
+    
+    void decrement() { m_raw_data -=m_stride;}
+    
+    void advance(int n) {m_raw_data += n*m_stride; }
+
+ 	std::ptrdiff_t distance_to(AttViewIterator j) 
+ 	{
+ 		assert(m_stride == j.m_stride);
+		return static_cast<std::ptrdiff_t >( (m_raw_data - j.m_raw_data) / m_stride);
+ 	
+	}	
+	
+	//*******************************************************
+	// private meber data
+	// store a raw_data pointer of char*
+    char* m_raw_data;
+    unsigned int m_stride;
+};
+
+//old code
+/*template<typename _CtnType>
 class view_element{
 protected:
 	typename _CtnType::const_iterator	_itr;
@@ -69,6 +124,6 @@ public:
 	virtual const value_type& value() const{
 		return *_itr;
 	}
-};
+};*/
 
 #endif /* LIDARDATAVIEWELEMENT_HPP_ */

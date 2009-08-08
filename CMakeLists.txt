@@ -12,6 +12,7 @@ FILE( GLOB ALL_GEOMETRY_HEADER_FILES src/LidarFormat/geometry/*.h )
 FILE( GLOB ALL_TOOLS_HEADER_FILES src/LidarFormat/tools/*.h src/LidarFormat/tools/*.hpp)
 FILE( GLOB ALL_MODELS_HEADER_FILES src/LidarFormat/models/*.h src/LidarFormat/models/*.hxx)
 FILE( GLOB ALL_EXTERN_HEADER_FILES src/extern/matis/*.h)
+FILE( GLOB ALL_VIEW_HEADER_FILES src/LidarFormat/LidarDataView*.hpp)
 
 
 #Génération du code de parse des fichiers xml (gestion du format lidar)
@@ -46,7 +47,7 @@ SET( ALL_SOURCES
         ${SRC_EXTERN_TERRABIN}
    )
 
-SET( ALL_HEADERS ${ALL_LIDAR_FORMAT_HEADER_FILES} ${ALL_MODELS_HEADER_FILES} ${ALL_GEOMETRY_HEADER_FILES})
+SET( ALL_HEADERS ${ALL_LIDAR_FORMAT_HEADER_FILES} ${ALL_MODELS_HEADER_FILES} ${ALL_GEOMETRY_HEADER_FILES} ${ALL_VIEW_HEADER_FILES})
 
 ####
 #### Recherche des libs

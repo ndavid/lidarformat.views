@@ -64,6 +64,7 @@ knowledge of the CeCILL-B license and that you accept its terms.
 
 #include "LidarFormat/LidarDataContainer.h"
 #include "LidarFormat/LidarFile.h"
+#include "LidarFormat/LidarDataViewElement.hpp"
 
 
 int main()
@@ -101,8 +102,14 @@ int main()
 	ostream_iterator<LidarEcho> echoOutputIterator( cout, "\n" );
 	copy(lidarContainer.begin(), lidarContainer.end(), echoOutputIterator);
 
-
-
+	//
+	std::cout << "\n\n x iterator test \n";
+	AttViewIterator<double> x_iterator=AttViewIterator<double>(lidarContainer.rawData(), 24);
+	for (int i=0; i<10 ; i++)
+	{
+		std::cout<<*x_iterator<<std::endl;
+		x_iterator++;
+	}
 
 
 	return 0;
