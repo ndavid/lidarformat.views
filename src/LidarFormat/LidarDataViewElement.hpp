@@ -114,6 +114,11 @@ public:
     unsigned int m_stride;
 };
 
+template<typename AttType1, int dim>
+class ViewProxyElement{
+	
+	
+}
 //old code
 /*template<typename _CtnType>
 class view_element{
