@@ -114,21 +114,96 @@ public:
     unsigned int m_stride;
 };
 
+
+
+//***********************************************************
+// proxy elements templated on dimension
 template<typename AttType1, int dim>
 class ViewProxyElement{
-	
+ public :
+	ViewProxyElement(){}
 	
 }
-//old code
-/*template<typename _CtnType>
-class view_element{
-protected:
-	typename _CtnType::const_iterator	_itr;
-public:
-	typedef typename _CtnType::value_type value_type;
-	virtual const value_type& value() const{
-		return *_itr;
-	}
-};*/
+
+template<typename AttType1, 0>
+class ViewProxyElement{
+	public :
+	ViewProxyElement(){}
+}
+
+template<typename AttType1, 1>
+class ViewProxyElement{
+	
+	public :
+		ViewProxyElement(AttType1* val0)
+			:value0(val0) {}
+		template<int dim> AttType1 get();
+		template<0> AttType1 get() {return *value0;}
+		
+		template<int dim> AttType1 set();
+		template<0> set( AttType1 value) { *value0=value;}
+		
+	private :	
+	AttType1* value0;
+}
+
+template<typename AttType1, 2>
+class ViewProxyElement{
+	
+	public :
+		ViewProxyElement(AttType1* val0,AttType1* val1)
+			:value0(val0),
+			value1(val1) {}
+		template<int dim> AttType1 get();
+		template<0> AttType1 get() {return *value0;}
+		template<1> AttType1 get() {return *value1;}
+		
+		template<int dim> AttType1 set();
+		template<0> set( AttType1 value) { *value0=value;}
+		template<1> set( AttType1 value) { *value1=value;}
+		
+	private :	
+	AttType1* value0;
+	AttType1* value1;
+}
+
+template<typename AttType1, 3>
+class ViewProxyElement{
+	
+	public :
+		ViewProxyElement(AttType1* val0,AttType1* val1,AttType1* val2)
+			:value0(val0),
+			value1(val1),
+			value2(val2){}
+		template<int dim> AttType1 get();
+		template<0> AttType1 get() {return *value0;}
+		template<1> AttType1 get() {return *value1;}
+		template<2> AttType1 get() {return *value2;}
+		
+		template<int dim> AttType1 set();
+		template<0> set( AttType1 value) { *value0=value;}
+		template<1> set( AttType1 value) { *value1=value;}
+		template<2> set( AttType1 value) { *value2=value;}
+		
+	private :	
+	AttType1* value0;
+	AttType1* value1;
+	AttType1* value2;
+}
+
+//*******************************************************
+// iterator templated on dim, only with proxy element
+template <typename AttType, int dim>
+class AttViewProxyIterator
+  : public boost::iterator_facade<
+      AttViewProxyIterator<AttType,int dim>
+      , AttType
+      , boost::random_access_traversal_tag
+      , ViewProxyElement<AttType, dim>&
+      ,std::ptrdiff_t
+    >
+{
+
+};
 
 #endif /* LIDARDATAVIEWELEMENT_HPP_ */
