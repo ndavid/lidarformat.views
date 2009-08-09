@@ -60,8 +60,20 @@ knowledge of the CeCILL-B license and that you accept its terms.
 #ifndef LIDARDATAVIEW_HPP_
 #define LIDARDATAVIEW_HPP_
 
-class LidarDataView{
-
+template<typename AttType>
+class LidarDataAttView{
+	public :
+	 	typedef AttViewIterator<AttType> iterator; 
+	 	
+	 	LidarDataAttView(boost::shared_ptr<LidarDataContainer> data, int offset, int stride); 
+		iterator begin();
+		iterator end();
+		bool empty();
+		
+	private :
+		boost::shared_ptr<LidarDataContainer> m_data_ptr;
+		int m_att_offset;
+		int m_att_stride;
 };
 
 
