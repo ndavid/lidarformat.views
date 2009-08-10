@@ -102,7 +102,7 @@ int main()
 	ostream_iterator<LidarEcho> echoOutputIterator( cout, "\n" );
 	copy(lidarContainer.begin(), lidarContainer.end(), echoOutputIterator);
 
-	//
+	//test iterator
 	std::cout << "\n\n x iterator test \n";
 	AttViewIterator<double> x_iterator=AttViewIterator<double>(lidarContainer.rawData(), 24);
 	for (int i=0; i<10 ; i++)
