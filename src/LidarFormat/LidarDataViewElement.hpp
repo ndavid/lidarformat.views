@@ -92,21 +92,21 @@ public:
         return this->m_raw_data == other.m_raw_data;
     }
 
-    AttType& dereference() const { 
+    AttType& dereference() const {
     	return *reinterpret_cast<AttType*>(m_raw_data);
     }
-    
+
     void decrement() { m_raw_data -=m_stride;}
-    
+
     void advance(int n) {m_raw_data += n*m_stride; }
 
- 	std::ptrdiff_t distance_to(AttViewIterator j) 
+ 	std::ptrdiff_t distance_to(AttViewIterator j)
  	{
  		assert(m_stride == j.m_stride);
 		return static_cast<std::ptrdiff_t >( (m_raw_data - j.m_raw_data) / m_stride);
- 	
-	}	
-	
+
+	}
+
 	//*******************************************************
 	// private meber data
 	// store a raw_data pointer of char*
@@ -122,88 +122,94 @@ template<typename AttType1, int dim>
 class ViewProxyElement{
  public :
 	ViewProxyElement(){}
-	
-}
 
-template<typename AttType1, 0>
-class ViewProxyElement{
-	public :
-	ViewProxyElement(){}
-}
+};
 
-template<typename AttType1, 1>
-class ViewProxyElement{
-	
+template<typename AttType1, int dim>
+class ViewProxyElement<AttType1 , 1>{
+
 	public :
+		ViewProxyElement():value0(0){}
 		ViewProxyElement(AttType1* val0)
 			:value0(val0) {}
 		template<int dim> AttType1 get();
-		template<0> AttType1 get() {return *value0;}
-		
-		template<int dim> AttType1 set();
-		template<0> set( AttType1 value) { *value0=value;}
-		
-	private :	
-	AttType1* value0;
-}
+		template<int dim> AttType1 get<0>() {return *value0;}
 
-template<typename AttType1, 2>
-class ViewProxyElement{
-	
+		template<int dim> void set(AttType1 value);
+		template<int dim> void set<0>(AttType1 value) { *value0=value;}
+
+	private :
+	AttType1* value0;
+};
+
+template<typename AttType1, int dim>
+class ViewProxyElement<AttType1 , 2>{
+
 	public :
+		ViewProxyElement():value0(0),value1(0) {}
 		ViewProxyElement(AttType1* val0,AttType1* val1)
 			:value0(val0),
 			value1(val1) {}
 		template<int dim> AttType1 get();
-		template<0> AttType1 get() {return *value0;}
-		template<1> AttType1 get() {return *value1;}
-		
-		template<int dim> AttType1 set();
-		template<0> set( AttType1 value) { *value0=value;}
-		template<1> set( AttType1 value) { *value1=value;}
-		
-	private :	
+		template<int dim> AttType1 get<0>() {return *value0;}
+		template<int dim> AttType1 get<1>() {return *value1;}
+
+		template<int dim> void set(AttType1 value);
+		template<int dim> void set<0>(AttType1 value) { *value0=value;}
+		template<int dim> void set<1>(AttType1 value) { *value1=value;}
+
+	private :
 	AttType1* value0;
 	AttType1* value1;
-}
+};
 
-template<typename AttType1, 3>
-class ViewProxyElement{
-	
+template<typename AttType1, int dim>
+class ViewProxyElement<AttType1, 3>{
+
 	public :
+		ViewProxyElement():value0(0), value1(0), value2(0){}
 		ViewProxyElement(AttType1* val0,AttType1* val1,AttType1* val2)
 			:value0(val0),
 			value1(val1),
 			value2(val2){}
+		ViewProxyElement()
+			:value0(0),
+			value1(0),
+			value2(0){}
 		template<int dim> AttType1 get();
-		template<0> AttType1 get() {return *value0;}
-		template<1> AttType1 get() {return *value1;}
-		template<2> AttType1 get() {return *value2;}
-		
-		template<int dim> AttType1 set();
-		template<0> set( AttType1 value) { *value0=value;}
-		template<1> set( AttType1 value) { *value1=value;}
-		template<2> set( AttType1 value) { *value2=value;}
-		
-	private :	
+		template<int dim> AttType1 get<0>() {return *value0;}
+		template<int dim> AttType1 get<1>() {return *value1;}
+		template<int dim> AttType1 get<2>() {return *value2;}
+
+		template<int dim> void set(AttType1 value);
+		template<int dim> void set<0>(AttType1 value) { *value0=value;}
+		template<int dim> void set<1>( AttType1 value) { *value1=value;}
+		template<int dim> void set<2>( AttType1 value) { *value2=value;}
+
+	private :
 	AttType1* value0;
 	AttType1* value1;
 	AttType1* value2;
-}
+};
 
 //*******************************************************
 // iterator templated on dim, only with proxy element
 template <typename AttType, int dim>
 class AttViewProxyIterator
   : public boost::iterator_facade<
-      AttViewProxyIterator<AttType,int dim>
-      , AttType
+      AttViewProxyIterator<AttType, dim>
+      , ViewProxyElement<AttType, dim>
       , boost::random_access_traversal_tag
       , ViewProxyElement<AttType, dim>&
       ,std::ptrdiff_t
     >
 {
 
+	//*******************************************************
+	// private meber data
+	// store a raw_data pointer of char*
+    char* m_raw_data;
+    ViewProxyElement<AttType, dim> proxy_element;
 };
 
 #endif /* LIDARDATAVIEWELEMENT_HPP_ */
