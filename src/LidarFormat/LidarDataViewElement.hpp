@@ -115,9 +115,11 @@ public:
 };
 
 
-
+//************************************************************
 //***********************************************************
-// proxy elements templated on dimension
+// simple value type proxy elements templated on dimension
+//*********************************************************
+ //*******************************************************
 template<typename AttType1, int dim>
 class ViewProxyElement{
  public :
@@ -192,6 +194,34 @@ class ViewProxyElement<AttType1, 3>{
 	AttType1* value2;
 };
 
+template<typename AttType, int dim>
+ViewProxyElement<AttType, dim> MakeViewProxyElement(char*, unsigned int *)
+{ }
+
+inline
+template<typename AttType, int dim>
+ViewProxyElement<AttType, 1> MakeViewProxyElement<AttType, 1>(char* raw_data, unsigned int * offsets)
+{
+ return ViewProxyElement<AttType, 1>(*reinterpret_cast<AttType*>(raw_data+*offset)) ;
+}
+
+inline
+template<typename AttType, int dim>
+ViewProxyElement<AttType, 2> MakeViewProxyElement<AttType, 2>(char* raw_data, unsigned int * offsets)
+{
+ return ViewProxyElement<AttType, 2>(*reinterpret_cast<AttType*>(raw_data+*offset),
+		 *reinterpret_cast<AttType*>(raw_data+*(offset+1))) ;
+}
+
+inline
+template<typename AttType, int dim>
+ViewProxyElement<AttType, 3> MakeViewProxyElement<AttType, 3>(char* raw_data, unsigned int * offsets)
+{
+ return ViewProxyElement<AttType, 3>(*reinterpret_cast<AttType*>(raw_data+*offset),
+		 *reinterpret_cast<AttType*>(raw_data+*(offset+1)),
+		 *reinterpret_cast<AttType*>(raw_data+*(offset+2)));
+}
+
 //*******************************************************
 // iterator templated on dim, only with proxy element
 template <typename AttType, int dim>
@@ -204,12 +234,63 @@ class AttViewProxyIterator
       ,std::ptrdiff_t
     >
 {
+public :
+		AttViewProxyIterator()
+	      : m_raw_data(0), m_stride(0)
+	       {
+	    	for(int i=0; i<dim ;i++){	m_offsets[i]=0;}
+	       }
+
+	    explicit AttViewProxyIterator(char* raw_data, unsigned int stride,
+	    		unsigned int offset0=0,
+	    		unsigned int offset1=0,
+	    		unsigned int offset2=0,
+	    		unsigned int offset3=0,
+	    		)
+	      : m_raw_data(raw_data),m_stride(stride)
+		{
+	    	  if (dim >= 1) m_offsets[0] = offset0;
+	    	  if (dim >= 2) m_offsets[1] = offset1;
+	    	   if (dim >= 3) m_offsets[2] = offset2;
+	    	   if (dim >= 3) m_offsets[3] = offset3;
+		}
+
+	 private:
+	    friend class boost::iterator_core_access;
+
+		//*****************************************************
+		//implement the iterator random access façade interface
+	    void increment() { m_raw_data += m_stride; }
+
+	    bool equal(AttViewIterator const& other) const
+	    {
+	        return ( (this->m_raw_data == other.m_raw_data) && (m_stride==other.m_stride));
+	    }
+
+	    ViewProxyElement<AttType, dim>& dereference() const {
+
+	    	return MakeViewProxyElement<AttType, dim> (m_raw_data, &m_offsets);
+
+	    }
+
+	    void decrement() { m_raw_data -=m_stride;}
+
+	    void advance(int n) {m_raw_data += n*m_stride; }
+
+	 	std::ptrdiff_t distance_to(AttViewIterator j)
+	 	{
+	 		assert(m_stride == j.m_stride);
+			return static_cast<std::ptrdiff_t >( (m_raw_data - j.m_raw_data) / m_stride);
+
+		}
 
 	//*******************************************************
 	// private meber data
 	// store a raw_data pointer of char*
     char* m_raw_data;
-    ViewProxyElement<AttType, dim> proxy_element;
+    unsigned int m_stride;
+    unsigned int m_offsets[dim];
+    //ViewProxyElement<AttType, dim> m_proxy_element;
 };
 
 #endif /* LIDARDATAVIEWELEMENT_HPP_ */

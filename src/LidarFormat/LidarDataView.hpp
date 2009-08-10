@@ -63,13 +63,23 @@ knowledge of the CeCILL-B license and that you accept its terms.
 template<typename AttType>
 class LidarDataAttView{
 	public :
-	 	typedef AttViewIterator<AttType> iterator; 
-	 	
-	 	LidarDataAttView(boost::shared_ptr<LidarDataContainer> data, int offset, int stride); 
-		iterator begin();
-		iterator end();
-		bool empty();
-		
+	 	typedef AttViewIterator<AttType> iterator;
+	 	LidarDataAttView(boost::shared_ptr<LidarDataContainer> data, int offset, int stride) :
+	 		m_data_ptr(data),
+	 		m_att_offset(offset),
+	 		m_att_stride(stride) {}
+		iterator begin()
+			{
+				char * raw_begin_att=m_data_ptr->rawData() + m_att_offset;
+				return iterator(raw_begin_att, m_att_stride);
+			}
+		iterator end()
+			{
+				int size=m_data_ptr->size();
+				char * raw_end_data=m_data_ptr->rawData() + m_att_offset+m_att_stride*size;
+				return iterator(raw_end_att, m_att_stride);
+			}
+
 	private :
 		boost::shared_ptr<LidarDataContainer> m_data_ptr;
 		int m_att_offset;
