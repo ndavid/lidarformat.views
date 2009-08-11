@@ -65,6 +65,7 @@ knowledge of the CeCILL-B license and that you accept its terms.
 #include "LidarFormat/LidarDataContainer.h"
 #include "LidarFormat/LidarFile.h"
 #include "LidarFormat/LidarDataViewElement.hpp"
+#include "LidarFormat/LidarDataView.hpp"
 
 
 int main()
@@ -84,10 +85,11 @@ int main()
 	LidarFile file(lidarFileName);
 
 	//create an empty LidarDataContainer, the object to contain point clouds
-	LidarDataContainer lidarContainer;
+	boost::shared_ptr<LidarDataContainer> lidarcontainer_ptr(new LidarDataContainer() );
+	//LidarDataContainer lidarContainer;
 
 	//Load data from the file to the container
-	file.loadData(lidarContainer);
+	file.loadData(*lidarcontainer_ptr);
 
 
 
@@ -96,20 +98,47 @@ int main()
 	std::cout << "\n\nContainer content:\n";
 
 	//Print the list of attributes
-	lidarContainer.printHeader(cout);
+	lidarcontainer_ptr->printHeader(cout);
 
 	//Print the content of the container
 	ostream_iterator<LidarEcho> echoOutputIterator( cout, "\n" );
-	copy(lidarContainer.begin(), lidarContainer.end(), echoOutputIterator);
+	copy(lidarcontainer_ptr->begin(), lidarcontainer_ptr->end(), echoOutputIterator);
 
-	//test iterator
+	//*********************************************
+	// testing iterations on Simple Attribute
+	//*********************************************
+	//test only Att iterator
 	std::cout << "\n\n x iterator test \n";
-	AttViewIterator<double> x_iterator=AttViewIterator<double>(lidarContainer.rawData(), 24);
+	AttViewIterator<double> x_iterator=AttViewIterator<double>(lidarcontainer_ptr->rawData(), 24);
 	for (int i=0; i<10 ; i++)
 	{
 		std::cout<<*x_iterator<<std::endl;
 		x_iterator++;
 	}
+	// test AttView
+	std::cout << "\n\n x view test \n";
+	unsigned int x_offset=lidarcontainer_ptr->getDecalage("x");
+	unsigned int echo_stride=lidarcontainer_ptr->pointSize();
+	LidarDataAttView<double> x_view=LidarDataAttView<double>(lidarcontainer_ptr, x_offset,echo_stride);
+	typedef LidarDataAttView<double>::iterator x_ite_type;
+	x_ite_type x_ite;
+	x_ite_type x_begin=x_view.begin();
+	x_ite_type x_end=x_view.end();
+	--x_end;
+	std::cout << " x begin "<<*x_begin<<std::endl;
+	std::cout<<" x end "<<*(x_end)<<std::endl;
+
+	for(x_ite=x_view.begin(); x_ite!=x_view.end(); x_ite++)
+	{
+		std::cout<<*x_ite<<std::endl;
+	}
+	std::cout<<" fin view"<<std::endl;
+		//Print the content of the container
+	//copy(x_view.begin(), x_view.end(), ostream_iterator<double>(cout, "\n"));
+	 // pb need copy algorithm seems to need const ite in input
+
+	// test type of att
+	//EnumLidarDataType x_type=lidarContainer.getAttributeType("x");
 
 
 	return 0;

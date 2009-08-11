@@ -127,100 +127,103 @@ class ViewProxyElement{
 
 };
 
-template<typename AttType1, int dim>
+template<typename AttType1>
 class ViewProxyElement<AttType1 , 1>{
 
 	public :
 		ViewProxyElement():value0(0){}
 		ViewProxyElement(AttType1* val0)
 			:value0(val0) {}
-		template<int dim> AttType1 get();
-		template<int dim> AttType1 get<0>() {return *value0;}
-
-		template<int dim> void set(AttType1 value);
-		template<int dim> void set<0>(AttType1 value) { *value0=value;}
+		template<int K> AttType1 get(){
+			return *value0;
+		}
+		template<int K> void set(AttType1 value){
+			if(K<1){ (*value0)=value;}
+		}
 
 	private :
 	AttType1* value0;
 };
 
-template<typename AttType1, int dim>
+template<typename AttType1>
 class ViewProxyElement<AttType1 , 2>{
 
 	public :
-		ViewProxyElement():value0(0),value1(0) {}
+		ViewProxyElement(){value[0]=NULL; value[1]=NULL;}
 		ViewProxyElement(AttType1* val0,AttType1* val1)
-			:value0(val0),
-			value1(val1) {}
-		template<int dim> AttType1 get();
-		template<int dim> AttType1 get<0>() {return *value0;}
-		template<int dim> AttType1 get<1>() {return *value1;}
+			{
+				value[0]=val0;
+				value[1]=val1;
+			}
+		template<int K> AttType1 get(){
+				return *(value[K]);
+		}
+		template<int K> void set(AttType1 value)
+		{
+			if(K<2){ *(value[K])=value;}
+		}
 
-		template<int dim> void set(AttType1 value);
-		template<int dim> void set<0>(AttType1 value) { *value0=value;}
-		template<int dim> void set<1>(AttType1 value) { *value1=value;}
 
 	private :
-	AttType1* value0;
-	AttType1* value1;
+	AttType1* value[2];
 };
 
-template<typename AttType1, int dim>
+template<typename AttType1>
 class ViewProxyElement<AttType1, 3>{
 
 	public :
-		ViewProxyElement():value0(0), value1(0), value2(0){}
+		ViewProxyElement(){value[0]=NULL; value[1]=NULL; value[2]=NULL;}
 		ViewProxyElement(AttType1* val0,AttType1* val1,AttType1* val2)
-			:value0(val0),
-			value1(val1),
-			value2(val2){}
-		ViewProxyElement()
-			:value0(0),
-			value1(0),
-			value2(0){}
-		template<int dim> AttType1 get();
-		template<int dim> AttType1 get<0>() {return *value0;}
-		template<int dim> AttType1 get<1>() {return *value1;}
-		template<int dim> AttType1 get<2>() {return *value2;}
+			{
+				value[0]=val0;
+				value[1]=val1;
+				value[2]=val2;
+			}
+		template<int K> AttType1 get(){
+				return *(value[K]);
+		}
+		template<int K> void set(AttType1 value)
+		{
+			if(K<3){ *(value[K])=value;}
+		}
 
-		template<int dim> void set(AttType1 value);
-		template<int dim> void set<0>(AttType1 value) { *value0=value;}
-		template<int dim> void set<1>( AttType1 value) { *value1=value;}
-		template<int dim> void set<2>( AttType1 value) { *value2=value;}
 
 	private :
-	AttType1* value0;
-	AttType1* value1;
-	AttType1* value2;
+	AttType1* value[3];
 };
 
 template<typename AttType, int dim>
-ViewProxyElement<AttType, dim> MakeViewProxyElement(char*, unsigned int *)
-{ }
-
-inline
-template<typename AttType, int dim>
-ViewProxyElement<AttType, 1> MakeViewProxyElement<AttType, 1>(char* raw_data, unsigned int * offsets)
+struct MakeViewProxyElement
 {
- return ViewProxyElement<AttType, 1>(*reinterpret_cast<AttType*>(raw_data+*offset)) ;
-}
+	ViewProxyElement<AttType, dim>  make(char*, unsigned int *){return ViewProxyElement<AttType, dim>();}
+};
 
-inline
-template<typename AttType, int dim>
-ViewProxyElement<AttType, 2> MakeViewProxyElement<AttType, 2>(char* raw_data, unsigned int * offsets)
+template<typename AttType>
+struct MakeViewProxyElement<AttType,1>
 {
- return ViewProxyElement<AttType, 2>(*reinterpret_cast<AttType*>(raw_data+*offset),
-		 *reinterpret_cast<AttType*>(raw_data+*(offset+1))) ;
-}
+	ViewProxyElement<AttType, 1>  make(char* raw_data, unsigned int * offset){
+		return ViewProxyElement<AttType, 1>(*reinterpret_cast<AttType*>(raw_data+*offset)) ;
+		}
+};
 
-inline
-template<typename AttType, int dim>
-ViewProxyElement<AttType, 3> MakeViewProxyElement<AttType, 3>(char* raw_data, unsigned int * offsets)
+template<typename AttType>
+struct MakeViewProxyElement<AttType,2>
 {
- return ViewProxyElement<AttType, 3>(*reinterpret_cast<AttType*>(raw_data+*offset),
-		 *reinterpret_cast<AttType*>(raw_data+*(offset+1)),
-		 *reinterpret_cast<AttType*>(raw_data+*(offset+2)));
-}
+	ViewProxyElement<AttType, 2>  make(char* raw_data, unsigned int * offset){
+		return ViewProxyElement<AttType, 2>(*reinterpret_cast<AttType*>(raw_data+*offset),
+				 *reinterpret_cast<AttType*>(raw_data+*(offset+1))) ;
+		}
+};
+
+template<typename AttType>
+struct MakeViewProxyElement<AttType,3>
+{
+	ViewProxyElement<AttType, 3>  make(char* raw_data, unsigned int * offset){
+		return ViewProxyElement<AttType, 3>(*reinterpret_cast<AttType*>(raw_data+*offset),
+				 *reinterpret_cast<AttType*>(raw_data+*(offset+1)),
+				 *reinterpret_cast<AttType*>(raw_data+*(offset+2)));
+		}
+};
 
 //*******************************************************
 // iterator templated on dim, only with proxy element
@@ -245,7 +248,7 @@ public :
 	    		unsigned int offset0=0,
 	    		unsigned int offset1=0,
 	    		unsigned int offset2=0,
-	    		unsigned int offset3=0,
+	    		unsigned int offset3=0
 	    		)
 	      : m_raw_data(raw_data),m_stride(stride)
 		{
@@ -262,14 +265,14 @@ public :
 		//implement the iterator random access façade interface
 	    void increment() { m_raw_data += m_stride; }
 
-	    bool equal(AttViewIterator const& other) const
+	    bool equal(AttViewProxyIterator const& other) const
 	    {
 	        return ( (this->m_raw_data == other.m_raw_data) && (m_stride==other.m_stride));
 	    }
 
 	    ViewProxyElement<AttType, dim>& dereference() const {
 
-	    	return MakeViewProxyElement<AttType, dim> (m_raw_data, &m_offsets);
+	    	return MakeViewProxyElement<AttType, dim>::make(m_raw_data, &m_offsets);
 
 	    }
 
@@ -277,7 +280,7 @@ public :
 
 	    void advance(int n) {m_raw_data += n*m_stride; }
 
-	 	std::ptrdiff_t distance_to(AttViewIterator j)
+	 	std::ptrdiff_t distance_to(AttViewProxyIterator j)
 	 	{
 	 		assert(m_stride == j.m_stride);
 			return static_cast<std::ptrdiff_t >( (m_raw_data - j.m_raw_data) / m_stride);
