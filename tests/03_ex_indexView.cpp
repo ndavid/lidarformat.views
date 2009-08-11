@@ -139,7 +139,16 @@ int main()
 
 	// test type of att
 	//EnumLidarDataType x_type=lidarContainer.getAttributeType("x");
-
+	std::cout << "\n\n xz iterator test \n";
+	AttViewProxyIterator<double, 2> xz_iterator=AttViewProxyIterator<double,2>(lidarcontainer_ptr->rawData(),echo_stride, 0,16);
+	typedef AttViewProxyIterator<double, 2>::reference xz_echo_type;
+		for (int i=0; i<10 ; i++)
+		{
+			xz_echo_type xz_echo;
+			xz_echo=*xz_iterator;
+			std::cout<<xz_echo.get<0>()<<" "<<xz_echo.get<1>()<<std::endl;
+			xz_iterator++;
+		}
 
 	return 0;
 }

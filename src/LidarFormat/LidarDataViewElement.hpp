@@ -201,27 +201,27 @@ struct MakeViewProxyElement
 template<typename AttType>
 struct MakeViewProxyElement<AttType,1>
 {
-	ViewProxyElement<AttType, 1>  make(char* raw_data, unsigned int * offset){
-		return ViewProxyElement<AttType, 1>(*reinterpret_cast<AttType*>(raw_data+*offset)) ;
+	ViewProxyElement<AttType, 1>  make(char* raw_data,const unsigned int * offset) const{
+		return ViewProxyElement<AttType, 1>(reinterpret_cast<AttType*>(raw_data+*offset)) ;
 		}
 };
 
 template<typename AttType>
 struct MakeViewProxyElement<AttType,2>
 {
-	ViewProxyElement<AttType, 2>  make(char* raw_data, unsigned int * offset){
-		return ViewProxyElement<AttType, 2>(*reinterpret_cast<AttType*>(raw_data+*offset),
-				 *reinterpret_cast<AttType*>(raw_data+*(offset+1))) ;
+	ViewProxyElement<AttType, 2>  make(char* raw_data, const unsigned int * offset) const{
+		return ViewProxyElement<AttType, 2>(reinterpret_cast<AttType*>(raw_data+*offset),
+				 reinterpret_cast<AttType*>(raw_data+*(offset+1)));
 		}
 };
 
 template<typename AttType>
 struct MakeViewProxyElement<AttType,3>
 {
-	ViewProxyElement<AttType, 3>  make(char* raw_data, unsigned int * offset){
-		return ViewProxyElement<AttType, 3>(*reinterpret_cast<AttType*>(raw_data+*offset),
-				 *reinterpret_cast<AttType*>(raw_data+*(offset+1)),
-				 *reinterpret_cast<AttType*>(raw_data+*(offset+2)));
+	ViewProxyElement<AttType, 3>  make(char* raw_data, const unsigned int * offset) const {
+		return ViewProxyElement<AttType, 3>(reinterpret_cast<AttType*>(raw_data+*offset),
+				 reinterpret_cast<AttType*>(raw_data+*(offset+1)),
+				 reinterpret_cast<AttType*>(raw_data+*(offset+2)));
 		}
 };
 
@@ -233,7 +233,7 @@ class AttViewProxyIterator
       AttViewProxyIterator<AttType, dim>
       , ViewProxyElement<AttType, dim>
       , boost::random_access_traversal_tag
-      , ViewProxyElement<AttType, dim>&
+      , ViewProxyElement<AttType, dim>
       ,std::ptrdiff_t
     >
 {
@@ -270,9 +270,8 @@ public :
 	        return ( (this->m_raw_data == other.m_raw_data) && (m_stride==other.m_stride));
 	    }
 
-	    ViewProxyElement<AttType, dim>& dereference() const {
-
-	    	return MakeViewProxyElement<AttType, dim>::make(m_raw_data, &m_offsets);
+	    ViewProxyElement<AttType, dim> dereference() const {
+	    	return make_proxy.make(m_raw_data, &m_offsets[0]);
 
 	    }
 
@@ -293,7 +292,7 @@ public :
     char* m_raw_data;
     unsigned int m_stride;
     unsigned int m_offsets[dim];
-    //ViewProxyElement<AttType, dim> m_proxy_element;
+    MakeViewProxyElement<AttType, dim> make_proxy;
 };
 
 #endif /* LIDARDATAVIEWELEMENT_HPP_ */
