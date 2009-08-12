@@ -104,9 +104,11 @@ int main()
 	ostream_iterator<LidarEcho> echoOutputIterator( cout, "\n" );
 	copy(lidarcontainer_ptr->begin(), lidarcontainer_ptr->end(), echoOutputIterator);
 
-	//*********************************************
+	//****************************************************************************************
+	//***************************************************************************************
 	// testing iterations on Simple Attribute
-	//*********************************************
+	//****************************************************************************************
+	//****************************************************************************************
 	//test only Att iterator
 	std::cout << "\n\n x iterator test \n";
 	AttViewIterator<double> x_iterator=AttViewIterator<double>(lidarcontainer_ptr->rawData(), 24);
@@ -137,7 +139,11 @@ int main()
 	//copy(x_view.begin(), x_view.end(), ostream_iterator<double>(cout, "\n"));
 	 // pb need copy algorithm seems to need const ite in input
 
-	// test type of att
+	//****************************************************************************************
+	//****************************************************************************************
+	// testing iterations on multiple value iterator
+	//****************************************************************************************
+	//****************************************************************************************
 	//EnumLidarDataType x_type=lidarContainer.getAttributeType("x");
 	std::cout << "\n\n xz iterator test \n";
 	AttViewProxyIterator<double, 2> xz_iterator=AttViewProxyIterator<double,2>(lidarcontainer_ptr->rawData(),echo_stride, 0,16);
@@ -149,6 +155,33 @@ int main()
 			std::cout<<xz_echo.get<0>()<<" "<<xz_echo.get<1>()<<std::endl;
 			xz_iterator++;
 		}
+
+	// test AttView
+	std::cout << "\n\n xzy view test \n";
+	unsigned int z_offset=lidarcontainer_ptr->getDecalage("z");
+	unsigned int y_offset=lidarcontainer_ptr->getDecalage("y");
+	LidarDataAttProxyView<double,3> xzy_view=LidarDataAttProxyView<double,3>(lidarcontainer_ptr, echo_stride, x_offset,z_offset,y_offset);
+	typedef LidarDataAttProxyView<double,3>::iterator xzy_ite_type;
+	typedef xzy_ite_type::reference xzy_echo_type;
+
+	xzy_ite_type xzy_ite;
+	xzy_ite_type xzy_begin=xzy_view.begin();
+	std::cout<<" begin "<<(*xzy_begin).get<0>()<<" "<<(*xzy_begin).get<1>()<<" "<<(*xzy_begin).get<2>()<<std::endl;
+	xzy_ite_type xzy_end=xzy_view.end();
+	--xzy_end;
+	std::cout<<" end -1 "<<(*xzy_end).get<0>()<<" "<<(*xzy_end).get<1>()<<" "<<(*xzy_end).get<2>()<<std::endl;
+	if(xzy_begin==xzy_end){std::cout<<" Pb begin and end iterator are same for equal comparison"<<std::endl;}
+	for(xzy_ite=xzy_view.begin(); xzy_ite!=xzy_view.end(); xzy_ite++)
+	{
+		std::cout<<(*xzy_ite).get<0>()<<" "<<(*xzy_ite).get<1>()<<" "<<(*xzy_ite).get<2>()<<std::endl;
+	}
+	std::cout<<" fin view"<<std::endl;
+
+	//****************************************************************************************
+	//****************************************************************************************
+	// indexing iterations
+	//****************************************************************************************
+	//****************************************************************************************
 
 	return 0;
 }
