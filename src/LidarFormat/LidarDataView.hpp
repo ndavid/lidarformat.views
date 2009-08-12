@@ -91,5 +91,86 @@ class LidarDataAttView{
 		unsigned int m_att_stride;
 };
 
+//*******************************************************
+// Multiple value / single type  proxy view .
+//    examples : xy view, xyz view, xz view etc..
+//******************************************************
+template<typename AttType, int dim>
+struct MakeViewProxyIterator
+{
+	AttViewProxyIterator<AttType, dim>  make(char*, unsigned int *){return AttViewProxyIterator<AttType, dim>();}
+};
+
+template<typename AttType>
+struct MakeViewProxyIterator<AttType,1>
+{
+	AttViewProxyIterator<AttType, 1>
+	make(char* raw_data,const unsigned int stride, const unsigned int m_att_offsets[1] ) const{
+		return AttViewProxyIterator<AttType, 1>(raw_data, stride,
+				m_att_offsets[0]
+		);
+	}
+};
+
+template<typename AttType>
+struct MakeViewProxyIterator<AttType,2>
+{
+	AttViewProxyIterator<AttType, 2>
+	make(char* raw_data, const unsigned int stride, const unsigned int m_att_offsets[2] ) const{
+		return AttViewProxyIterator<AttType, 2>(raw_data, stride,
+		m_att_offsets[0],
+		m_att_offsets[1]
+		);
+		}
+};
+
+template<typename AttType>
+struct MakeViewProxyIterator<AttType,3>
+{
+	AttViewProxyIterator<AttType, 3>
+	make(char* raw_data,  const unsigned int stride, const unsigned int m_att_offsets[3]) const {
+		return AttViewProxyIterator<AttType, 3>(raw_data, stride,
+				m_att_offsets[0],
+				m_att_offsets[1],
+				m_att_offsets[2]
+	    		);
+		}
+};
+template<typename AttType, int dim>
+class LidarDataAttProxyView{
+
+	public :
+	 	typedef AttViewProxyIterator<AttType,dim> iterator;
+	 	LidarDataAttProxyView(boost::shared_ptr<LidarDataContainer> data, unsigned int stride, unsigned int offset0=0,
+	    		unsigned int offset1=0,
+	    		unsigned int offset2=0,
+	    		unsigned int offset3=0
+	    		)
+	      : m_data_ptr(data),m_att_stride(stride)
+		{
+	    	  if (dim >= 1) m_att_offsets[0] = offset0;
+	    	  if (dim >= 2) m_att_offsets[1] = offset1;
+	    	   if (dim >= 3) m_att_offsets[2] = offset2;
+	    	   if (dim >= 3) m_att_offsets[3] = offset3;
+		}
+		iterator begin()
+			{
+				char * raw_begin_att=m_data_ptr->rawData();
+				return make_iterator.make(raw_begin_att, m_att_stride,m_att_offsets);
+			}
+		iterator end()
+			{
+				int size=m_data_ptr->size();
+				char * raw_end_data=m_data_ptr->rawData()+m_att_stride*(size);
+				return make_iterator.make(raw_end_data, m_att_stride, m_att_offsets);
+			}
+
+	private :
+		boost::shared_ptr<LidarDataContainer> m_data_ptr;
+		unsigned int m_att_stride;
+		unsigned int m_att_offsets[dim];
+		MakeViewProxyIterator<AttType, dim> make_iterator;
+};
+
 
 #endif /* LIDARDATAVIEW_HPP_ */
