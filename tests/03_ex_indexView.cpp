@@ -182,6 +182,28 @@ int main()
 	// indexing iterations
 	//****************************************************************************************
 	//****************************************************************************************
+	std::cout<<std::endl<<" debut index view"<<std::endl;
+	std::cout<<" \t index 2 4 6 8 "<<std::endl;
+	boost::shared_ptr<std::vector<int> > index_ptr(new std::vector<int> );
+	index_ptr->push_back(2);
+	index_ptr->push_back(4);
+	index_ptr->push_back(6);
+	index_ptr->push_back(8);
+	typedef LidarDataAttProxyIndexView<double,3> index_view_type;
+	typedef index_view_type::iterator xyz_index_ite_type;
+	typedef xyz_index_ite_type::reference xzy_index_echo_type;
+	index_view_type xzy_indexview=index_view_type(lidarcontainer_ptr,index_ptr, echo_stride, x_offset,z_offset,y_offset);
+	xyz_index_ite_type xzy_index_ite;
+	xyz_index_ite_type xzy_index_begin=xzy_indexview.begin();
+	std::cout<<" begin "<<(*xzy_index_begin).get<0>()<<" "<<(*xzy_index_begin).get<1>()<<" "<<(*xzy_index_begin).get<2>()<<std::endl;
+	xyz_index_ite_type xzy_index_end=xzy_indexview.end();
+	--xzy_index_end;
+	std::cout<<" end -1 "<<(*xzy_index_end).get<0>()<<" "<<(*xzy_index_end).get<1>()<<" "<<(*xzy_index_end).get<2>()<<std::endl;
+	for(xzy_index_ite=xzy_indexview.begin(); xzy_index_ite!=xzy_indexview.end(); xzy_index_ite++)
+	{
+		std::cout<<(*xzy_index_ite).get<0>()<<" "<<(*xzy_index_ite).get<1>()<<" "<<(*xzy_index_ite).get<2>()<<std::endl;
+	}
+	std::cout<<" fin view"<<std::endl;
 
 	return 0;
 }

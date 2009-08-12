@@ -61,7 +61,7 @@ knowledge of the CeCILL-B license and that you accept its terms.
 #define LIDARDATAVIEW_HPP_
 
 #include "LidarFormat/LidarDataContainer.h"
-
+#include <boost/iterator/permutation_iterator.hpp>
 using namespace Lidar;
 
 template<typename AttType>
@@ -172,5 +172,52 @@ class LidarDataAttProxyView{
 		MakeViewProxyIterator<AttType, dim> make_iterator;
 };
 
+//*******************************************************
+// Multiple value / single type  proxy view .
+//    examples : xy view, xyz view, xz view etc..
+//******************************************************
+template<typename AttType, int dim>
+class LidarDataAttProxyIndexView{
+
+	public :
+	 	typedef AttViewProxyIterator<AttType,dim> element_iterator;
+	 	typedef std::vector<int>::iterator index_iterator;
+	 	typedef boost::permutation_iterator< element_iterator, index_iterator > iterator;
+
+	 	LidarDataAttProxyIndexView(boost::shared_ptr<LidarDataContainer> data,boost::shared_ptr<std::vector<int> > index, unsigned int stride, unsigned int offset0=0,
+	    		unsigned int offset1=0,
+	    		unsigned int offset2=0,
+	    		unsigned int offset3=0
+	    		)
+	      : m_data_ptr(data),m_index_ptr(index),m_att_stride(stride)
+		{
+	    	  if (dim >= 1) m_att_offsets[0] = offset0;
+	    	  if (dim >= 2) m_att_offsets[1] = offset1;
+	    	   if (dim >= 3) m_att_offsets[2] = offset2;
+	    	   if (dim >= 3) m_att_offsets[3] = offset3;
+		}
+		iterator begin()
+			{
+				char * raw_begin_att=m_data_ptr->rawData();
+				//return make_iterator.make(raw_begin_att, m_att_stride,m_att_offsets);
+				return make_permutation_iterator( make_iterator.make(raw_begin_att, m_att_stride,m_att_offsets), m_index_ptr->begin() );
+				//permutation_type it = begin;
+				//permutation_type end = make_permutation_iterator( elements.begin(), indices.end() );
+
+			}
+		iterator end()
+			{
+			char * raw_begin_att=m_data_ptr->rawData();
+							//return make_iterator.make(raw_begin_att, m_att_stride,m_att_offsets);
+			return make_permutation_iterator( make_iterator.make(raw_begin_att, m_att_stride,m_att_offsets), m_index_ptr->end() );
+			}
+
+	private :
+		boost::shared_ptr<LidarDataContainer> m_data_ptr;
+		boost::shared_ptr<std::vector<int> > m_index_ptr;
+		unsigned int m_att_stride;
+		unsigned int m_att_offsets[dim];
+		MakeViewProxyIterator<AttType, dim> make_iterator;
+};
 
 #endif /* LIDARDATAVIEW_HPP_ */
