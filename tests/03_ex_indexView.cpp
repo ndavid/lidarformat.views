@@ -60,6 +60,8 @@ knowledge of the CeCILL-B license and that you accept its terms.
 #include <iostream>
 #include <boost/filesystem.hpp>
 
+#include <boost/progress.hpp>
+
 #include "config_data_test.h"
 
 #include "LidarFormat/LidarDataContainer.h"
@@ -206,5 +208,81 @@ int main()
 	std::cout<<" fin view"<<std::endl;
 
 	return 0;
+}
+
+
+void checkPerformance()
+{
+	boost::shared_ptr<LidarDataContainer> lidarContainer(new LidarDataContainer() );
+
+	lidarContainer->addAttribute("x", LidarDataType::float64);
+//	lidarContainer->addAttribute("y", LidarDataType::float64);
+//	lidarContainer->addAttribute("z", LidarDataType::float64);
+	const std::size_t taille = 50000000;
+	lidarContainer->resize(taille);
+
+
+
+	{
+		std::cout << "\n\nIterator Attribute:\n";
+
+
+		const LidarConstIteratorAttribute<double> ite = lidarContainer->endAttribute<double>("x");
+		const LidarConstIteratorAttribute<double> itbegin = lidarContainer->beginAttribute<double>("x");
+
+		boost::progress_timer t; //start timing
+		for(unsigned int k=0; k < 50; ++k)
+		{
+			LidarConstIteratorAttribute<double> itb = itbegin;
+			for( ; itb != ite; ++itb)
+				*itb = 1.0;
+		}
+
+	}
+
+
+	{
+		std::cout << "\n\nAttViewIterator:\n";
+
+		const unsigned int x_offset = lidarContainer->getDecalage("x");
+		const unsigned int echo_stride = lidarContainer->pointSize();
+		LidarDataAttView<double> x_view = LidarDataAttView<double>(lidarContainer, x_offset, echo_stride);
+		typedef LidarDataAttView<double>::iterator x_ite_type;
+
+
+		const x_ite_type ite = x_view.end();
+		const x_ite_type itbegin = x_view.begin();
+
+		boost::progress_timer t; //start timing
+		for(unsigned int k=0; k < 50; ++k)
+		{
+			x_ite_type itb = itbegin;
+			for( ; itb != ite; ++itb)
+				*itb = 1.0;
+		}
+
+	}
+
+
+	{
+		std::cout << "\n\nvector:\n";
+
+		typedef std::vector<double> ContainerType;
+		ContainerType container(taille);
+
+
+		const ContainerType::iterator ite = container.end();
+		const ContainerType::iterator itbegin = container.begin();
+
+		boost::progress_timer t; //start timing
+		for(unsigned int k=0; k < 50; ++k)
+		{
+			ContainerType::iterator itb = itbegin;
+			for( ; itb != ite; ++itb)
+				*itb = 1.0;
+		}
+
+	}
+
 }
 
