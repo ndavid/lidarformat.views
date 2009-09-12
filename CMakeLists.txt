@@ -19,6 +19,7 @@ FILE( GLOB ALL_GEOMETRY_HEADER_FILES src/LidarFormat/geometry/*.h )
 FILE( GLOB ALL_TOOLS_HEADER_FILES src/LidarFormat/tools/*.h src/LidarFormat/tools/*.hpp)
 FILE( GLOB ALL_MODELS_HEADER_FILES src/LidarFormat/models/*.h src/LidarFormat/models/*.hxx)
 FILE( GLOB ALL_EXTERN_HEADER_FILES src/LidarFormat/extern/matis/*.h)
+FILE( GLOB ALL_VIEW_HEADER_FILES src/LidarFormat/LidarDataView*.hpp)
 
 
 #Génération du code de parse des fichiers xml (gestion du format lidar)
@@ -55,7 +56,7 @@ SET( ALL_SOURCES
         ${SRC_EXTERN_TERRABIN}
    )
 
-SET( ALL_HEADERS ${ALL_LIDAR_FORMAT_HEADER_FILES} ${ALL_MODELS_HEADER_FILES} ${ALL_GEOMETRY_HEADER_FILES})
+SET( ALL_HEADERS ${ALL_LIDAR_FORMAT_HEADER_FILES} ${ALL_MODELS_HEADER_FILES} ${ALL_GEOMETRY_HEADER_FILES} ${ALL_VIEW_HEADER_FILES})
 
 ####
 #### Recherche des libs
@@ -92,6 +93,7 @@ if( Boost_FOUND )
 else()
 	message( FATAL_ERROR "Boost not found ! Please set Boost path ..." )
 endif()
+
 
 
 ####
@@ -157,6 +159,9 @@ ADD_LIBRARY( LidarFormat  ${LIBRARY_TYPE} ${ALL_SOURCES} ${ALL_HEADERS}  )
 
 TARGET_LINK_LIBRARIES( LidarFormat ${LidarFormat_LIBRAIRIES} )
 
+
+
+
 ####
 #### Construction du sample
 ####
@@ -178,4 +183,3 @@ OPTION( BUILD_INSTALL "Generate install target" ON)
 IF(BUILD_INSTALL)
 	INCLUDE(LidarFormat_install.cmake )
 ENDIF(BUILD_INSTALL)
-
