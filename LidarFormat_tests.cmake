@@ -11,6 +11,7 @@ SET( all_tests
         unit_tests
         01_ex_basics
         02_ex_filtering
+        03_ex_indexView
     )
 
 FOREACH( one_test ${all_tests} )
